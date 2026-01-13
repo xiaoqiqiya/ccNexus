@@ -1,0 +1,32 @@
+name: Build Docker Image and Save as TAR
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-tar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t ccnexus:latest -f ./cmd/server/Dockerfile .
+
+      - name: Save Docker image as tar
+        run: |
+          docker save ccnexus:latest -o ccnexus.tar
+
+      - name: Upload tar as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccnexus-docker-image
+          path: ccnexus.tar
+          retention-days: 7  # 可选：保留7天，默认90天
